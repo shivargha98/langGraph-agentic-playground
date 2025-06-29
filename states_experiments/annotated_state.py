@@ -1,23 +1,25 @@
 from typing import TypedDict,List,Annotated
 from langgraph.graph import END,StateGraph
+import operator
 
 class SimpleState(TypedDict):
     ## This is the blueprint of the State ##  
     count: int
-    sum: int
-    history_count: List[int]
-    history_sum: List[int] 
+    sum: Annotated[int,operator.add]
+    history_count: Annotated[List[int], operator.concat]
+    history_sum: Annotated[List[int] , operator.concat]
     
 ### Normal message graph would only have a list of messages
 def increment(state:SimpleState) -> SimpleState:
     ##function takes in a state returns a modified state##
     ##Manual State Transformation
+    new_count = state['count'] + 1
     return {
 
-        'count': state['count'] + 1,
-        'sum': state['sum'] + state['count'] + 1,
-        'history_count': state['history_count'] + [state['count'] + 1],
-        'history_sum': state['history_sum'] + [state['sum'] + state['count'] + 1]
+        'count': new_count,
+        'sum': new_count, ##sum of all new_counts via operator.add,new value of new_count gets added
+        'history_count': [new_count], ##update via list + list,new value of new_count gets concat as list
+        'history_sum': [state['sum'] + new_count]
     }
 
 def should_continue(state):
