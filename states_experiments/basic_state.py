@@ -35,7 +35,7 @@ graph.set_entry_point("increment")
 app = graph.compile()
 print(app.get_graph().draw_mermaid())
 
-state = {'count':-1} ##intital state##
+state = {'count':0} ##intital state##
 res = app.invoke(state)
 #####
 print(res)
