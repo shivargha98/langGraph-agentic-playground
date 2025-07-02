@@ -1,5 +1,5 @@
 .env
 *.pyc
 */_pycache_
-experiments/.ipynb_checkpoints
+*/.ipynb_checkpoints
 */checkpoint.*
