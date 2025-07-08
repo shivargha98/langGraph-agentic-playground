@@ -1,10 +1,12 @@
 from langchain_core.prompts import ChatPromptTemplate,MessagesPlaceholder
+from langchain_core.messages import AIMessage, BaseMessage, ToolMessage, HumanMessage
 from state import *
 from tools import *
 from utils import *
+import json
 
 
-def reactNode(state:AgentState):
+def act(state:AgentState):
     tools = [text_listing_tool, bar_chart_tool, line_chart_tool]
     llm_with_tools = llm_model.bind_tools(tools)
     
@@ -46,9 +48,36 @@ def execute_tools(state:AgentState):
     if isinstance(state['messages'][-1],AIMessage):
         ai_message = state['messages'][-1]
         if hasattr(ai_message,"tool_calls"):
-            tool_messages = []
+            #tool_messages = []
             for tool_call in ai_message.tool_calls:
                 tool_call_function = tool_call['name']
                 call_id = tool_call["id"]
+                if tool_call_function == 'text_listing_tool':
+                    data = json.loads(state['sql_result'])
+                    title = state['question']
+                    path = tools_by_name[tool_call['name']].invoke({'data':data,'title':title})
+                    state['messages'].append(
+                        ToolMessage(
+                            content = "Plot saved at: "+path,
+                            tool_call_id = call_id,
+                            tool_name = tool_call['name'] ##required for gemini
+                        )
+                    )
 
-                
+                else:
+                    data = json.loads(state['sql_result'])
+                    title = state['question']
+                    x_axis = state['sql_query_columns'][0]
+                    y_axis = state['sql_query_columns'][1]
+                    path = tools_by_name[tool_call['name']].invoke({'data':data,'title':title,\
+                                    'x_axis':x_axis,'y_axis':y_axis})
+                    state['messages'].append(
+                        ToolMessage(
+                            content = "Plot saved at: "+path,
+                            tool_call_id = call_id,
+                            tool_name = tool_call['name'] ##required for gemini
+                        )
+                    )
+            return state
+        else:
+            return state
