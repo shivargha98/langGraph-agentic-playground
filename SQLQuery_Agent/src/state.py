@@ -6,8 +6,11 @@ import operator
 class AgentState(TypedDict):
     messages: Annotated[List[BaseMessage],add_messages]
     question: HumanMessage
+    question_histoty: Annotated[List[HumanMessage],add_messages]
     on_topic_classifier: str ##on topic or off topic classifier
-    next_tool_selection: Union[str,None]
-    sql_query: Union[str,None] ##stores the SQL syntax###
+    tool_selection_history: List[str]
+    sql_query:str  #Union[str,None] ##stores the SQL syntax###
     sql_query_columns: List[str]
-    sql_result: Annotated[List[str],operator.concat]
+    sql_result:str #Annotated[List[str],operator.concat]
+    sql_query_history: Annotated[List[str],operator.concat]
+    sql_result_history: Annotated[List[str],operator.concat]
