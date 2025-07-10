@@ -4,16 +4,21 @@ from pydantic import BaseModel, Field
 from state import AgentState
 from typing import List
 from utils import *
+import sqlite3
 import json
 
 def SQLExecutor(state:AgentState):
     if state['next_tool_selection'] == 'sqlexecutor':
+        if "sql_result_history" not in state or state["sql_result_history"] is None:
+            state["sql_result_history"] = []
+
         sql_query_code = state['sql_query']
         try:
             conn = sqlite3.connect(db_path)
+
             result = conn.execute(sql_query_code).fetchall()
             
-            print(result)
+            print("res:",result)
             
             if len(state['sql_query_columns']) == 1:
                 #print([i[0] for i in result])
@@ -62,7 +67,7 @@ def SQLExecutor(state:AgentState):
                         state['sql_query_columns'] = col_names_reindexed
 
             ###################################################################################
-                                
+            state['sql_result_history'].append(state['sql_result'])                
             return state
         except Exception as error:
             #state['sql_result'].append(json.dumps(result))
@@ -70,12 +75,10 @@ def SQLExecutor(state:AgentState):
             return state
 
 if __name__ == "__main__":
-    state = {'messages': [HumanMessage(content='Show monthly revenue from invoice sales', additional_kwargs={}, response_metadata={}),
-            AIMessage(content="SELECT strftime('%Y-%m', InvoiceDate) AS month, SUM(Total) AS revenue FROM Invoice GROUP BY month ORDER BY month;", additional_kwargs={}, response_metadata={})],
-            'sql_result': '',
-            'question': HumanMessage(content='Show monthly revenue from invoice sales', additional_kwargs={}, response_metadata={}),
-            'sql_query': "SELECT strftime('%Y-%m', InvoiceDate) AS month, SUM(Total) AS revenue FROM Invoice GROUP BY month ORDER BY month;",
-            'sql_query_columns': ['month', 'revenue'],
-            'next_tool_selection': 'sqlexecutor'}
+    state = {'question': HumanMessage(content='List all albums released my metallica', additional_kwargs={}, response_metadata={}),\
+            'messages': [HumanMessage(content='List all albums released my metallica', additional_kwargs={}, response_metadata={}), AIMessage(content='Yes', additional_kwargs={'pydantic_model': 'ClassifyQuestion'}, response_metadata={}), AIMessage(content='SELECT Album.Title FROM Album JOIN Artist ON Album.ArtistId = Artist.ArtistId WHERE Artist.Name = "Metallica"', additional_kwargs={'pydantic_model': 'SQLOutput'}, response_metadata={})],\
+            'question_history': [HumanMessage(content='List all albums released my metallica', additional_kwargs={}, response_metadata={})], \
+            'on_topic_classifier': 'Yes', 'sql_query': 'SELECT Album.Title FROM Album JOIN Artist ON Album.ArtistId = Artist.ArtistId WHERE Artist.Name = "Metallica"', \
+                'sql_query_columns': ['AlbumTitle'], 'next_tool_selection': 'sqlexecutor', 'sql_query_history': ['SELECT Album.Title FROM Album JOIN Artist ON Album.ArtistId = Artist.ArtistId WHERE Artist.Name = "Metallica"']}
     state_after_sqlexec = SQLExecutor(state)
     print(state_after_sqlexec)

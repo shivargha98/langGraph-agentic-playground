@@ -24,14 +24,27 @@ def on_topic_classifier(state:AgentState):
             if the question is relevant and is in the bounds of the above database, respond with a 'Yes'.Otherwise respond with a 'No'
                                     """.format(schema_database=schema_knowledge))
 
+    #print(list(state.keys()))
+    if len(list(state.keys())) <= 1:
+        state['messages'] = []
+        state['question_history'] = []
+        state['reflection_iterations'] = 0
+
+    ## add question history and messages ##
+    state['question_history'].append(state['question'])
+    state['messages'].append(state['question'])
+
     human_message = HumanMessage(content=f"User Question: {state['question'].content}")
     classfier_prompt_template = ChatPromptTemplate.from_messages([sys_message,human_message])
     structure_llm = llm_model.with_structured_output(ClassifyQuestion)
     classifier_chain = classfier_prompt_template | structure_llm
     on_topic_res = classifier_chain.invoke({})
+    ### add the AI message and on topic classifier ###
+    state['messages'].append(AIMessage(content=on_topic_res.on_topic_label.strip(),additional_kwargs={'pydantic_model':on_topic_res.__class__.__name__}))
     state['on_topic_classifier'] = str(on_topic_res.on_topic_label.strip())
+    #print(state)
     return state
 
 if __name__ == "__main__":
     state1 = on_topic_classifier({'question':HumanMessage(content="List all customers in alphabetical order")})
-    print(state1)
+    print('state after classifier:',state1)
