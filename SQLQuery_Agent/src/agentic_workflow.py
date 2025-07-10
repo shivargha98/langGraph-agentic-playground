@@ -14,7 +14,7 @@ import io
 workflowGraph = StateGraph(AgentState)
 workflowGraph.add_node("topic_classifier",on_topic_classifier)
 workflowGraph.add_node("sql_generator",SQLGenerator)
-workflowGraph.add_node("sqlgen_reflection",reflect)
+workflowGraph.add_node("sql_query_reflection",reflect)
 workflowGraph.add_node("sql_executor",SQLExecutor)
 workflowGraph.add_node("actNode",act)
 workflowGraph.add_node("toolNode",execute_tools)
@@ -55,11 +55,11 @@ workflowGraph.add_conditional_edges("topic_classifier",
 
 workflowGraph.add_conditional_edges("sql_generator",reflect_iter,
                                     {
-                                        "REFLECT":"sqlgen_reflection",
+                                        "REFLECT":"sql_query_reflection",
                                         "SQLEXEC":"sql_executor"
 
                                     })
-workflowGraph.add_edge("sqlgen_reflection","sql_generator")
+workflowGraph.add_edge("sql_query_reflection","sql_generator")
 #workflowGraph.add_edge("sql_generator","sql_executor")
 workflowGraph.add_edge("sql_executor","actNode")
 workflowGraph.add_edge("actNode","toolNode")
