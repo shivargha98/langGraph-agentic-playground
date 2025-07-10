@@ -63,6 +63,7 @@ def execute_tools(state:AgentState):
                             tool_name = tool_call['name'] ##required for gemini
                         )
                     )
+                    state['next_tool_selection'] = tool_call['name']
 
                 else:
                     data = json.loads(state['sql_result'])
@@ -78,6 +79,7 @@ def execute_tools(state:AgentState):
                             tool_name = tool_call['name'] ##required for gemini
                         )
                     )
+                    state['next_tool_selection'] = tool_call['name']
             return state
         else:
             return state

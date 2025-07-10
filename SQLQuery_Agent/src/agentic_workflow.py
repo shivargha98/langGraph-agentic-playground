@@ -6,6 +6,7 @@ from sql_executor import *
 from sql_generator import *
 from actNode import *
 from relfection_node import *
+from query_judge import *
 from PIL import Image
 from langchain_core.runnables.graph import MermaidDrawMethod
 import io
@@ -17,6 +18,17 @@ workflowGraph.add_node("sqlgen_reflection",reflect)
 workflowGraph.add_node("sql_executor",SQLExecutor)
 workflowGraph.add_node("actNode",act)
 workflowGraph.add_node("toolNode",execute_tools)
+workflowGraph.add_node("judgeLLM",judge_reflect)
+
+def judge_iter(state:AgentState):
+    if state['full_reflection_iter'] < 2:
+         state['full_reflection_iter'] = state['full_reflection_iter'] + 1
+         return "END"
+    elif state['full_reflection'][-1]['node_retry'].lower() == 'sqlgenerator':
+        return "SQL_GEN"
+    elif state['full_reflection'][-1]['node_retry'].lower() == 'toolnode':
+        return "TOOL"
+
 
 
 def reflect_iter(state:AgentState):
@@ -32,8 +44,7 @@ def should_end(state:AgentState):
     if state['on_topic_classifier'] == 'No':
         return "END"
     else:
-        return "SQLGEN"
-
+        return "SQL_GEN"
 
 workflowGraph.add_conditional_edges("topic_classifier",
                                     should_end,
@@ -52,7 +63,14 @@ workflowGraph.add_edge("sqlgen_reflection","sql_generator")
 #workflowGraph.add_edge("sql_generator","sql_executor")
 workflowGraph.add_edge("sql_executor","actNode")
 workflowGraph.add_edge("actNode","toolNode")
-workflowGraph.add_edge("toolNode",END)
+workflowGraph.add_edge("toolNode","judgeLLM")
+workflowGraph.add_conditional_edges("judgeLLM",judge_iter,
+                                    {
+                                        "END":END,
+                                        "SQL_GEN":"sql_generator",
+                                        "TOOL":"toolNode"
+
+                                    })
 
 workflowGraph.set_entry_point("topic_classifier")
 app = workflowGraph.compile()

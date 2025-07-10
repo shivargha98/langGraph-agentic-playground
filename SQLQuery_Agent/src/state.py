@@ -9,7 +9,7 @@ class AgentState(TypedDict):
     question: HumanMessage
     question_history: Annotated[List[HumanMessage],add_messages]
     on_topic_classifier: str ##on topic or off topic classifier
-    tool_selection_history: List[str]
+    next_tool_selection: str
     sql_query:str  #Union[str,None] ##stores the SQL syntax###
     sql_query_columns: List[str]
     sql_result:str #Annotated[List[str],operator.concat]
