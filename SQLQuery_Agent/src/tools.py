@@ -1,8 +1,10 @@
 import matplotlib.pyplot as plt
 from typing import List,Dict
-from langchain_core.tools import tool
+import langchain_core.tools
+import agentops.sdk.decorators
 
-@tool
+@langchain_core.tools.tool
+@agentops.sdk.decorators.tool()
 def text_listing_tool(data: List[str], title: str) -> str:
     """
     Displays a list of textual entries as bullet points.
@@ -33,7 +35,8 @@ def text_listing_tool(data: List[str], title: str) -> str:
 
 
 
-@tool
+@langchain_core.tools.tool
+@agentops.sdk.decorators.tool()
 def bar_chart_tool(data: Dict[str, float], title: str, x_axis: str, y_axis: str) -> str:
     '''
     Generates a bar chart from categorical-numeric pairs.
@@ -71,8 +74,8 @@ def bar_chart_tool(data: Dict[str, float], title: str, x_axis: str, y_axis: str)
 
 
 
-
-@tool
+@langchain_core.tools.tool
+@agentops.sdk.decorators.tool()
 def line_chart_tool(data:Dict[str,float],x_axis:str,y_axis:str,title:str):
     '''
     Creates a line chart from time series data.

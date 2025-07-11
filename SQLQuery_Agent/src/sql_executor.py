@@ -6,7 +6,9 @@ from typing import List
 from utils import *
 import sqlite3
 import json
+from agentops.sdk.decorators import tool
 
+@tool(name='SQL_query_executor')
 def SQLExecutor(state:AgentState):
     if state['next_tool_selection'] == 'sqlexecutor':
         if "sql_result_history" not in state or state["sql_result_history"] is None:
