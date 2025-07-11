@@ -15,7 +15,7 @@ class AgentState(TypedDict):
     sql_result:str #Annotated[List[str],operator.concat]
     sql_query_history: Annotated[List[str],operator.concat]
     sql_result_history: Annotated[List[str],operator.concat]
-    sql_query_reflection_history: Annotated[List[HumanMessage],add_messages]
+    sql_query_reflection_history:  List[Dict[str,Any]]
     reflection_iterations: int
     full_reflection_iter: int
     full_reflection: List[Dict[str,Any]]

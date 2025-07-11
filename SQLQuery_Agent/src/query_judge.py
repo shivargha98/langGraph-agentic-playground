@@ -19,7 +19,7 @@ class judgeReflection(BaseModel):
 
 def judge_reflect(state:AgentState):
 
-    state['full_reflection_iter'] = 0
+    #state['full_reflection_iter'] = 0
 
     REFLECTION_JUDGE_PROMPT = """
             You are an intelligent judge that evaluates whether the generated output answers the user's question accurately.
@@ -86,6 +86,7 @@ def judge_reflect(state:AgentState):
             "tool_description":tool_desc,"schema":schema_desc
     })
     #print(dict(response))
+    print("\n State after full reflection:",state)
     state["full_reflection"].append(dict(response))
     return state
 

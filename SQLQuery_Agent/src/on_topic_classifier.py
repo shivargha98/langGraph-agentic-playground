@@ -28,7 +28,7 @@ def on_topic_classifier(state:AgentState):
     if len(list(state.keys())) <= 1:
         state['messages'] = []
         state['question_history'] = []
-        state['reflection_iterations'] = 0
+        #state['reflection_iterations'] = 0
 
     ## add question history and messages ##
     state['question_history'].append(state['question'])
@@ -42,6 +42,8 @@ def on_topic_classifier(state:AgentState):
     ### add the AI message and on topic classifier ###
     state['messages'].append(AIMessage(content=on_topic_res.on_topic_label.strip(),additional_kwargs={'pydantic_model':on_topic_res.__class__.__name__}))
     state['on_topic_classifier'] = str(on_topic_res.on_topic_label.strip())
+    state['reflection_iterations'] = 0
+    state['full_reflection_iter'] = 0
     print("state after topic classifier:",state)
     return state
 

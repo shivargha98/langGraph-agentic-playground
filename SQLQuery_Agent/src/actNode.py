@@ -36,6 +36,8 @@ def act(state:AgentState):
                  'sql_result':state['sql_result'][-1],
                  'column_names':state['sql_query_columns']})
     state['messages'].append(ai_message)
+
+    print("\n State after Act Node:",state)
     return state
 
 
@@ -54,7 +56,7 @@ def execute_tools(state:AgentState):
                 call_id = tool_call["id"]
                 if tool_call_function == 'text_listing_tool':
                     data = json.loads(state['sql_result'])
-                    title = state['question']
+                    title = state['question'].content
                     path = tools_by_name[tool_call['name']].invoke({'data':data,'title':title})
                     state['messages'].append(
                         ToolMessage(
@@ -67,7 +69,7 @@ def execute_tools(state:AgentState):
 
                 else:
                     data = json.loads(state['sql_result'])
-                    title = state['question']
+                    title = state['question'].content
                     x_axis = state['sql_query_columns'][0]
                     y_axis = state['sql_query_columns'][1]
                     path = tools_by_name[tool_call['name']].invoke({'data':data,'title':title,\
@@ -80,6 +82,7 @@ def execute_tools(state:AgentState):
                         )
                     )
                     state['next_tool_selection'] = tool_call['name']
+            print("\n State after tool execution:",state)
             return state
         else:
             return state

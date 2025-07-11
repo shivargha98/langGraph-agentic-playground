@@ -45,11 +45,16 @@ def SQLGenerator(state:AgentState):
 
     if "sql_query_history" not in state or state["sql_query_history"] is None:
         state["sql_query_history"] = []
+    if "sql_query_reflection_history" not in state or state["sql_query_reflection_history"] is None:
+        state["sql_query_reflection_history"] = []
+    if 'full_reflection' not in state or state["sql_query_reflection_history"] is None:
+        state["full_reflection"] = []
 
     state['sql_query_history'].append(sql_query_response.sql_query)
 
     state['messages'].append(AIMessage(content=sql_query_response.sql_query,\
                                        additional_kwargs={'pydantic_model':sql_query_response.__class__.__name__}))
+    print("State after SQL generator:",state)
     return state
 
 

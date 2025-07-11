@@ -59,7 +59,8 @@ def reflect(state:AgentState):
         state['sql_query'] = response.revised_sql_query.strip()
         state['sql_query_history'].append(response.revised_sql_query.strip())
 
-    state['sql_query_reflection_history'].append(response.revised_sql_query.strip())
+    state['sql_query_reflection_history'].append(dict(response))
+    print("\n state after reflection:",state)
         
 
 

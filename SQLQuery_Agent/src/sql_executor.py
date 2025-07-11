@@ -67,7 +67,8 @@ def SQLExecutor(state:AgentState):
                         state['sql_query_columns'] = col_names_reindexed
 
             ###################################################################################
-            state['sql_result_history'].append(state['sql_result'])                
+            state['sql_result_history'].append(state['sql_result'])        
+            print("\nState after sq EXEC:",state)        
             return state
         except Exception as error:
             #state['sql_result'].append(json.dumps(result))
