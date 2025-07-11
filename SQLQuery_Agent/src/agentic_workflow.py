@@ -8,6 +8,7 @@ from actNode import *
 from relfection_node import *
 from query_judge import *
 from PIL import Image
+from langchain_core.messages import HumanMessage
 from langchain_core.runnables.graph import MermaidDrawMethod
 import io
 
@@ -50,7 +51,7 @@ workflowGraph.add_conditional_edges("topic_classifier",
                                     should_end,
                                     {
                                         "END":END,
-                                        "SQLGEN":"sql_generator"
+                                        "SQL_GEN":"sql_generator"
                                     })
 
 workflowGraph.add_conditional_edges("sql_generator",reflect_iter,
@@ -79,3 +80,8 @@ image = app.get_graph().draw_mermaid_png(draw_method=MermaidDrawMethod.API)
 ##convert bytes to PIL format
 image = Image.open(io.BytesIO(image))
 image.save("graph.png")
+print("Image saved")
+
+
+response = app.invoke({'question':HumanMessage(content="Show Total sales for each country")})
+print(response)

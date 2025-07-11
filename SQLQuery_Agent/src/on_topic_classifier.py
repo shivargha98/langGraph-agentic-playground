@@ -42,7 +42,7 @@ def on_topic_classifier(state:AgentState):
     ### add the AI message and on topic classifier ###
     state['messages'].append(AIMessage(content=on_topic_res.on_topic_label.strip(),additional_kwargs={'pydantic_model':on_topic_res.__class__.__name__}))
     state['on_topic_classifier'] = str(on_topic_res.on_topic_label.strip())
-    #print(state)
+    print("state after topic classifier:",state)
     return state
 
 if __name__ == "__main__":
