@@ -63,6 +63,39 @@ class SQLGen_agent:
                                         additional_kwargs={'pydantic_model':sql_query_response.__class__.__name__}))
         print("State after SQL generator:",state)
         return state
+    
+
+
+    @staticmethod
+    def sqlgen_for_eval(user_query):
+
+        template = '''
+            You are an expert SQL data analyst, you convert natural language questions into correct and optimised SQL queries.
+            You are working with the following database schema:
+            {schema_database}
+
+            Description about the database:
+            The Chinook database is a sample SQL database that simulates a digital music store. \
+            It contains tables for artists, albums, tracks, customers, invoices, and employees 
+
+            Here is the user question:
+            {user_query}
+
+            Your task outline is:
+            1. Understand the user's query and intent
+            2. Identify the relevant tables and columns
+            3. Join tables correctly if needed
+            4. Filter and aggregate results appropriately
+            5. Return the SQL query only
+            '''
+        sql_prompt_template = ChatPromptTemplate.from_template(template)
+        recent_question = user_query.strip()
+        structure_llm = llm_model.with_structured_output(SQLOutput)
+        sql_generation = sql_prompt_template | structure_llm
+        #state['messages'].append(HumanMessage(content=recent_question))
+        sql_query_response = sql_generation.invoke({"schema_database":schema_knowledge,"user_query":recent_question})
+        print(sql_query_response)
+        return sql_query_response.sql_query
 
 
 if __name__ == "__main__":
@@ -73,3 +106,6 @@ if __name__ == "__main__":
                             'question_history': [HumanMessage(content='List all albums released my metallica', additional_kwargs={}, response_metadata={})], \
                                                 'on_topic_classifier': 'Yes'})
     print("State after sql generator:",state1)
+
+    state2 = SQLGen_agent.sqlgen_for_eval("List all albums released my metallica")
+    print("\nResponse:",str(state2),type(state2))

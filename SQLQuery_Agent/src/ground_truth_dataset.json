@@ -1,0 +1,122 @@
+[
+  {
+    "input": "List all albums by Metallica",
+    "expected_sql": "SELECT Title FROM Album INNER JOIN Artist ON Album.ArtistId = Artist.ArtistId WHERE Name = 'Metallica';"
+  },
+  {
+    "input": "Show all tracks from the album 'Black Album'",
+    "expected_sql": "SELECT Name FROM Track INNER JOIN Album ON Track.AlbumId = Album.AlbumId WHERE Album.Title = 'Black Album';"
+  },
+  {
+    "input": "Get the names of all artists",
+    "expected_sql": "SELECT Name FROM Artist;"
+  },
+  {
+    "input": "Which genres are available?",
+    "expected_sql": "SELECT Name FROM Genre;"
+  },
+  {
+    "input": "Find all employees with their job titles",
+    "expected_sql": "SELECT FirstName, LastName, Title FROM Employee;"
+  },
+  {
+    "input": "List all invoices from the USA",
+    "expected_sql": "SELECT * FROM Invoice WHERE BillingCountry = 'USA';"
+  },
+  {
+    "input": "Show all tracks longer than 5 minutes",
+    "expected_sql": "SELECT Name FROM Track WHERE Milliseconds > 300000;"
+  },
+  {
+    "input": "List all playlists and their number of tracks",
+    "expected_sql": "SELECT Playlist.Name, COUNT(PlaylistTrack.TrackId) as TrackCount FROM Playlist INNER JOIN PlaylistTrack ON Playlist.PlaylistId = PlaylistTrack.PlaylistId GROUP BY Playlist.Name;"
+  },
+  {
+    "input": "Get the total sales for each country",
+    "expected_sql": "SELECT BillingCountry, SUM(Total) as TotalSales FROM Invoice GROUP BY BillingCountry;"
+  },
+  {
+    "input": "Show all customers from Brazil",
+    "expected_sql": "SELECT FirstName, LastName FROM Customer WHERE Country = 'Brazil';"
+  },
+  {
+    "input": "Find the total duration of all tracks in hours",
+    "expected_sql": "SELECT SUM(Milliseconds) / 3600000.0 as TotalHours FROM Track;"
+  },
+  {
+    "input": "What are the most popular genres by track count?",
+    "expected_sql": "SELECT Genre.Name, COUNT(*) as Count FROM Track INNER JOIN Genre ON Track.GenreId = Genre.GenreId GROUP BY Genre.Name ORDER BY Count DESC;"
+  },
+  {
+    "input": "List invoices with total more than 20",
+    "expected_sql": "SELECT * FROM Invoice WHERE Total > 20;"
+  },
+  {
+    "input": "Show all albums and their corresponding artists",
+    "expected_sql": "SELECT Album.Title, Artist.Name FROM Album INNER JOIN Artist ON Album.ArtistId = Artist.ArtistId;"
+  },
+  {
+    "input": "List all employees who report to someone",
+    "expected_sql": "SELECT FirstName, LastName FROM Employee WHERE ReportsTo IS NOT NULL;"
+  },
+  {
+    "input": "Get the average track length in milliseconds",
+    "expected_sql": "SELECT AVG(Milliseconds) as AvgLength FROM Track;"
+  },
+  {
+    "input": "Show all customers with their support representative",
+    "expected_sql": "SELECT Customer.FirstName, Customer.LastName, Employee.FirstName as RepFirstName, Employee.LastName as RepLastName FROM Customer INNER JOIN Employee ON Customer.SupportRepId = Employee.EmployeeId;"
+  },
+  {
+    "input": "Find all invoices with customer name",
+    "expected_sql": "SELECT Invoice.InvoiceId, Customer.FirstName, Customer.LastName, Invoice.Total FROM Invoice INNER JOIN Customer ON Invoice.CustomerId = Customer.CustomerId;"
+  },
+  {
+    "input": "Which tracks are in the 'Rock' genre?",
+    "expected_sql": "SELECT Track.Name FROM Track INNER JOIN Genre ON Track.GenreId = Genre.GenreId WHERE Genre.Name = 'Rock';"
+  },
+  {
+    "input": "List customers from each country",
+    "expected_sql": "SELECT Country, COUNT(*) as CustomerCount FROM Customer GROUP BY Country;"
+  },
+  {
+    "input": "Get all albums released by 'AC/DC'",
+    "expected_sql": "SELECT Title FROM Album INNER JOIN Artist ON Album.ArtistId = Artist.ArtistId WHERE Name = 'AC/DC';"
+  },
+  {
+    "input": "List top 5 most expensive tracks",
+    "expected_sql": "SELECT Name, UnitPrice FROM Track ORDER BY UnitPrice DESC LIMIT 5;"
+  },
+  {
+    "input": "Find all customers in Canada",
+    "expected_sql": "SELECT FirstName, LastName FROM Customer WHERE Country = 'Canada';"
+  },
+  {
+    "input": "Show invoice details including customer name and total",
+    "expected_sql": "SELECT Invoice.InvoiceId, Customer.FirstName, Customer.LastName, Invoice.Total FROM Invoice INNER JOIN Customer ON Invoice.CustomerId = Customer.CustomerId;"
+  },
+  {
+    "input": "Get the total sales made by each employee",
+    "expected_sql": "SELECT Employee.FirstName, Employee.LastName, SUM(Invoice.Total) as Sales FROM Customer INNER JOIN Employee ON Customer.SupportRepId = Employee.EmployeeId INNER JOIN Invoice ON Customer.CustomerId = Invoice.CustomerId GROUP BY Employee.EmployeeId;"
+  },
+  {
+    "input": "List all tracks that are in the playlist 'Music'",
+    "expected_sql": "SELECT Track.Name FROM Track INNER JOIN PlaylistTrack ON Track.TrackId = PlaylistTrack.TrackId INNER JOIN Playlist ON Playlist.PlaylistId = PlaylistTrack.PlaylistId WHERE Playlist.Name = 'Music';"
+  },
+  {
+    "input": "Get customers who have not made any purchases",
+    "expected_sql": "SELECT FirstName, LastName FROM Customer WHERE CustomerId NOT IN (SELECT CustomerId FROM Invoice);"
+  },
+  {
+    "input": "Find the artist who has the most albums",
+    "expected_sql": "SELECT Artist.Name FROM Album INNER JOIN Artist ON Album.ArtistId = Artist.ArtistId GROUP BY Artist.ArtistId ORDER BY COUNT(*) DESC LIMIT 1;"
+  },
+  {
+    "input": "List all genres with their total number of tracks",
+    "expected_sql": "SELECT Genre.Name, COUNT(Track.TrackId) FROM Genre INNER JOIN Track ON Genre.GenreId = Track.GenreId GROUP BY Genre.Name;"
+  },
+  {
+    "input": "Which albums have more than 10 tracks?",
+    "expected_sql": "SELECT Album.Title FROM Album INNER JOIN Track ON Album.AlbumId = Track.AlbumId GROUP BY Album.Title HAVING COUNT(Track.TrackId) > 10;"
+  }
+]
