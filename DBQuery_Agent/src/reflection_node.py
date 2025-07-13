@@ -19,6 +19,8 @@ class SQL_query_reflect:
     @operation(name="Query_relfection")
     def reflect(state:AgentState):
 
+        print("\nReflecting on the SQL Query, Can it be optimised?")
+
         prompt = '''
         You are an expert SQL analyst.
         Your job is to review a generated SQL query based on the user question,schema of the database,description of the database\
@@ -56,7 +58,7 @@ class SQL_query_reflect:
         user_query = state['question'].content
         sql_query = state['sql_query']
         response = revisor_chain.invoke({'user_question':user_query,'schema':schema_desc,'sql_query': sql_query})
-        print(response)
+        #print(response)
         if response.revision_flag.lower().strip() == "no":
             pass
         else:
@@ -64,7 +66,10 @@ class SQL_query_reflect:
             state['sql_query_history'].append(response.revised_sql_query.strip())
 
         state['sql_query_reflection_history'].append(dict(response))
-        print("\n state after reflection:",state)
+
+        print("Reflecting Completed")
+        #print("\n state after reflection:",state)
+        return state
         
 
 

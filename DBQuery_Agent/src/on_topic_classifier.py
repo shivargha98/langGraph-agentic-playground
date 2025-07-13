@@ -22,7 +22,9 @@ class TopicClassifier:
     @staticmethod
     @operation(name="query_classification_function")
     def on_topic_classifier(state:AgentState):
-        print("Inside On Topic Classifier, at present the state is:",state)
+        #print("Inside On Topic Classifier, at present the state is:",state)
+
+        print("\nQuery Classification Started")
         recent_question = state['question'].content
         sys_message = SystemMessage(content= """ You are classifier that determine's if the user's question is about the following database:
                 The Chinook database is a sample SQL database that simulates a digital music store. \
@@ -53,7 +55,9 @@ class TopicClassifier:
         state['on_topic_classifier'] = str(on_topic_res.on_topic_label.strip())
         state['reflection_iterations'] = 0
         state['full_reflection_iter'] = 0
-        print("state after topic classifier:",state)
+        #print("state after topic classifier:",state)
+
+        print("Query Classification Done")
         return state
 
 if __name__ == "__main__":

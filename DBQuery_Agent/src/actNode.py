@@ -11,6 +11,8 @@ class ReACT:
     @staticmethod
     @operation(name="Act_operation")
     def act(state:AgentState):
+
+        print("\nThinking of an Action based on the user Query and data extracted from database")
         tools = [text_listing_tool, bar_chart_tool, line_chart_tool]
         llm_with_tools = llm_model.bind_tools(tools)
         
@@ -41,7 +43,9 @@ class ReACT:
                     'column_names':state['sql_query_columns']})
         state['messages'].append(ai_message)
 
-        print("\n State after Act Node:",state)
+        #print("\n State after Act Node:",state)
+
+        print("Completed Thought, Taking action")
         return state
     
     @staticmethod
@@ -56,7 +60,9 @@ class ReACT:
             ai_message = state['messages'][-1]
             if hasattr(ai_message,"tool_calls"):
                 #tool_messages = []
+                
                 for tool_call in ai_message.tool_calls:
+                    print("\nUsing {} for visualisation".format(tool_call['name']))
                     tool_call_function = tool_call['name']
                     call_id = tool_call["id"]
                     if tool_call_function == 'text_listing_tool':
@@ -87,7 +93,9 @@ class ReACT:
                             )
                         )
                         state['next_tool_selection'] = tool_call['name']
-                print("\n State after tool execution:",state)
+                #print("\n State after tool execution:",state)
+                print("Executed the tool")
                 return state
             else:
+                print("No tool was required")
                 return state

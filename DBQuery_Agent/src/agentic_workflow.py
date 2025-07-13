@@ -6,9 +6,11 @@ from sql_executor import *
 from sql_generator import *
 from actNode import *
 from reflection_node import *
+from sql_guardrail import *
 from query_judge import *
 from PIL import Image
-from langchain_core.messages import HumanMessage
+from langgraph.checkpoint.memory import MemorySaver
+from langchain_core.messages import HumanMessage,AIMessage
 from langchain_core.runnables.graph import MermaidDrawMethod
 import io
 import os
@@ -23,6 +25,23 @@ agentops.init(
 )
 
 workflowGraph = StateGraph(AgentState)
+memory = MemorySaver()
+
+
+
+
+def end_node(state:AgentState):
+    if state['on_topic_classifier'] == 'No':
+        #print(AIMessage(content="Off Topic Question"))
+        state['messages'].append(AIMessage(content="Off Topic Question"))
+
+    elif state['guardrail_validation'] == "validation_failed":
+        #print(AIMessage(content="Guard Failed, DELETE or DROP query detected"))
+        state['messages'].append(AIMessage(content="Guard Failed, DELETE or DROP query detected in SQL query"))
+    else:
+        #print(AIMessage(content="Analytics generated"))
+        state['messages'].append(AIMessage(content="All steps followed, llm judged and analytics generated"))
+        
 
 
 def judgellm_decide(state:AgentState):
@@ -45,8 +64,8 @@ def sqlreflect_decide(state:AgentState):
          #print("reflection_iterations:",state['reflection_iterations'])
          return "SQLEXEC"
      else:
-         return "REFLECT"
-         
+         #return "REFLECT"
+         return "GUARD"
 
 def should_end(state:AgentState):
 
@@ -55,32 +74,52 @@ def should_end(state:AgentState):
     else:
         return "SQL_GEN"
     
+
+def guardrail_logic(state:AgentState):
+    if state['guardrail_validation'][-1] == "validation_success":
+        return "REFLECT"
+    else:
+        return "END"
+
 @workflow(name="build_sql_graph")
 def build_graph():
 
     
     workflowGraph.add_node("topic_classifier",TopicClassifier.on_topic_classifier)
     workflowGraph.add_node("sql_generator",SQLGen_agent.SQLGenerator)
+    workflowGraph.add_node("sql_guardrail",SQL_guard)
     workflowGraph.add_node("sql_query_reflection",SQL_query_reflect.reflect)
     workflowGraph.add_node("sql_executor",SQLExecutor)
     workflowGraph.add_node("actNode",ReACT.act)
     workflowGraph.add_node("toolNode",ReACT.execute_tools)
     workflowGraph.add_node("judgeLLM",LLM_judge.judge_reflect)
+    workflowGraph.add_node("end_node",end_node)
 
 
     workflowGraph.add_conditional_edges("topic_classifier",
                                         should_end,
                                         {
-                                            "END":END,
+                                            "END":"end_node",
                                             "SQL_GEN":"sql_generator"
                                         })
+    
+
 
     workflowGraph.add_conditional_edges("sql_generator",sqlreflect_decide,
                                         {
-                                            "REFLECT":"sql_query_reflection",
+                                            "GUARD":"sql_guardrail",
                                             "SQLEXEC":"sql_executor"
 
                                         })
+    
+
+    workflowGraph.add_conditional_edges("sql_guardrail",guardrail_logic,
+                                        {
+                                            "REFLECT":"sql_query_reflection",
+                                            "END":"end_node"
+
+                                        })
+    
     workflowGraph.add_edge("sql_query_reflection","sql_generator")
     #workflowGraph.add_edge("sql_generator","sql_executor")
     workflowGraph.add_edge("sql_executor","actNode")
@@ -88,14 +127,16 @@ def build_graph():
     workflowGraph.add_edge("toolNode","judgeLLM")
     workflowGraph.add_conditional_edges("judgeLLM",judgellm_decide,
                                         {
-                                            "END":END,
+                                            "END":"end_node",
                                             "SQL_GEN":"sql_generator",
                                             "TOOL":"toolNode"
 
                                         })
+    
+    workflowGraph.add_edge("end_node",END)
 
     workflowGraph.set_entry_point("topic_classifier")
-    app = workflowGraph.compile()
+    app = workflowGraph.compile(checkpointer=memory)
     print('APP compiled')
     image = app.get_graph().draw_mermaid_png(draw_method=MermaidDrawMethod.API)
     ##convert bytes to PIL format
@@ -108,9 +149,14 @@ def build_graph():
 
 
 @session(name="SQL_Agent_Trace")
-def run_workflow(user_query):
+def run_workflow(user_query,app):
 
-    app = build_graph()
-    response = app.invoke({'question':HumanMessage(content=user_query)})
-    print(response)
+    
+    config = {"configurable":{
+        "thread_id":1}}
+    response = app.invoke({'question':HumanMessage(content=user_query)},config)
+    #print(response)
     return response
+
+if __name__ == "__main__":
+    app = build_graph()

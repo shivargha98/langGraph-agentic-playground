@@ -1,5 +1,5 @@
-2025-07-12 01:52:00,339 - INFO - AgentOps: 'langgraph' is the first-targeted agentic library. Will uninstrument providers if any are/become active.
-2025-07-12 01:52:00,355 - INFO - AgentOps: Successfully instrumented 'LanggraphInstrumentor' for package 'agentops.instrumentation.agentic.langgraph'.
-2025-07-12 01:52:00,355 - WARNING - session() is deprecated and will be removed in v4 in the future. Use @trace decorator instead.
-2025-07-12 01:55:30,856 - INFO - Session Replay for SQL_Agent_Trace trace: https://app.agentops.ai/sessions?trace_id=0bf9abe48b998c72a6e8d2f89b1af9d0
-2025-07-12 01:55:52,507 - INFO - Session Replay for SQL_Agent_Trace.session trace: https://app.agentops.ai/sessions?trace_id=0bf9abe48b998c72a6e8d2f89b1af9d0
+2025-07-13 23:18:12,217 - INFO - AgentOps: 'langgraph' is the first-targeted agentic library. Will uninstrument providers if any are/become active.
+2025-07-13 23:18:12,230 - INFO - AgentOps: Successfully instrumented 'LanggraphInstrumentor' for package 'agentops.instrumentation.agentic.langgraph'.
+2025-07-13 23:18:12,230 - WARNING - session() is deprecated and will be removed in v4 in the future. Use @trace decorator instead.
+2025-07-13 23:18:25,751 - INFO - Session Replay for SQL_Agent_Trace trace: https://app.agentops.ai/sessions?trace_id=bc0e1b027aa40f44f40d9cf630070f30
+2025-07-13 23:18:47,537 - INFO - Session Replay for SQL_Agent_Trace.session trace: https://app.agentops.ai/sessions?trace_id=bc0e1b027aa40f44f40d9cf630070f30

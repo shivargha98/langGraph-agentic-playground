@@ -13,9 +13,10 @@ class AgentState(TypedDict):
     sql_query:str  #Union[str,None] ##stores the SQL syntax###
     sql_query_columns: List[str]
     sql_result:str #Annotated[List[str],operator.concat]
-    sql_query_history: Annotated[List[str],operator.concat]
-    sql_result_history: Annotated[List[str],operator.concat]
+    sql_query_history: List[str]
+    sql_result_history: List[str]
     sql_query_reflection_history:  List[Dict[str,Any]]
     reflection_iterations: int
     full_reflection_iter: int
     full_reflection: List[Dict[str,Any]]
+    guardrail_validation: List[str]

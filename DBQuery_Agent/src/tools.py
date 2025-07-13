@@ -60,7 +60,7 @@ def bar_chart_tool(data: Dict[str, float], title: str, x_axis: str, y_axis: str)
             y_axis = "Revenue (USD)"
         
     '''
-    plt.figure(figsize=(11,13))
+    plt.figure(figsize=(10,8))
     plt.bar(list(data.keys()), list(data.values()),width=0.3)
     plt.title(title)
     plt.xlabel(x_axis,fontweight='bold')
@@ -99,7 +99,7 @@ def line_chart_tool(data:Dict[str,float],x_axis:str,y_axis:str,title:str):
             y_axis = "Revenue (USD)"
     
     '''
-    plt.figure(figsize=(11,13))
+    plt.figure(figsize=(10,8))
     plt.plot(list(data.keys()), list(data.values()), linewidth=2)
     plt.xlabel(x_axis,fontweight='bold')
     plt.ylabel(y_axis,fontweight='bold')

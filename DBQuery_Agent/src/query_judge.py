@@ -26,6 +26,7 @@ class LLM_judge:
 
         #state['full_reflection_iter'] = 0
 
+        print("\nLLM judge: Reflecting on the entire flow of actions")
         REFLECTION_JUDGE_PROMPT = """
                 You are an intelligent judge that evaluates whether the generated output answers the user's question accurately.
                 Review the following, also providing database schema and database description.
@@ -91,8 +92,10 @@ class LLM_judge:
                 "tool_description":tool_desc,"schema":schema_desc
         })
         #print(dict(response))
-        print("\n State after full reflection:",state)
+        #print("\n State after full reflection:",state)
         state["full_reflection"].append(dict(response))
+
+        print("LLM Judge action completed")
         return state
 
 if __name__ == "__main__":

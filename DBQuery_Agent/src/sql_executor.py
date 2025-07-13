@@ -10,6 +10,8 @@ from agentops.sdk.decorators import tool
 
 @tool(name='SQL_query_executor')
 def SQLExecutor(state:AgentState):
+
+    print("\nSQL Execution on Database")
     if state['next_tool_selection'] == 'sqlexecutor':
         if "sql_result_history" not in state or state["sql_result_history"] is None:
             state["sql_result_history"] = []
@@ -20,7 +22,7 @@ def SQLExecutor(state:AgentState):
 
             result = conn.execute(sql_query_code).fetchall()
             
-            print("res:",result)
+            #print("res:",result)
             
             if len(state['sql_query_columns']) == 1:
                 #print([i[0] for i in result])
@@ -35,22 +37,22 @@ def SQLExecutor(state:AgentState):
                     if len(i) > 1:
                         data1.append(i[0])
                         data2.append(i[1])
-                print(data1,data2)
+                #print(data1,data2)
                 column_names = state['sql_query_columns']
                 title = state['question'].content
 
                 ##############################################################
                 
                 if all(isinstance(x, str) for x in data1):
-                    print('1a')
+                    #print('1a')
                     if all(isinstance(x, int) for x in data2):
-                        print('1b')
+                        #print('1b')
                         dict_data = {k:v for k,v in zip(data1,data2)}
                         col_names_reindexed = column_names
                         state['sql_result'] = json.dumps(dict_data)
                         #state['sql_query_columns']
                     elif all(isinstance(x, float) for x in data2):
-                        print('1b')
+                        #print('1b')
                         dict_data = {k:v for k,v in zip(data1,data2)}
                         col_names_reindexed = column_names
                         state['sql_result'] = json.dumps(dict_data)
@@ -70,11 +72,13 @@ def SQLExecutor(state:AgentState):
 
             ###################################################################################
             state['sql_result_history'].append(state['sql_result'])        
-            print("\nState after sq EXEC:",state)        
+            #print("\nState after sq EXEC:",state)   
+            print("SQL Execution Completed Successfully")     
             return state
         except Exception as error:
             #state['sql_result'].append(json.dumps(result))
             print(error)
+            print("SQL Execution Failed") 
             return state
 
 if __name__ == "__main__":

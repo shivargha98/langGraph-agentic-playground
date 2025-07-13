@@ -17,9 +17,9 @@ class SQLGen_agent:
     @staticmethod
     @operation(name="query_generator_operation")
     def SQLGenerator(state:AgentState):
-        print("inside the SQLGenerator agent; state at the moment:",state)
+        #print("inside the SQLGenerator agent; state at the moment:",state)
 
-
+        print("\nSQL Query Generation started")
         template = '''
             You are an expert SQL data analyst, you convert natural language questions into correct and optimised SQL queries.
             You are working with the following database schema:
@@ -45,7 +45,7 @@ class SQLGen_agent:
         sql_generation = sql_prompt_template | structure_llm
         #state['messages'].append(HumanMessage(content=recent_question))
         sql_query_response = sql_generation.invoke({"schema_database":schema_knowledge,"user_query":recent_question})
-        print(sql_query_response)
+        print("SQL Query Generated: ",sql_query_response.sql_query)
         state['sql_query'] = sql_query_response.sql_query
         state['sql_query_columns'] = sql_query_response.sql_column_names
         state['next_tool_selection'] = 'sqlexecutor'
@@ -61,7 +61,8 @@ class SQLGen_agent:
 
         state['messages'].append(AIMessage(content=sql_query_response.sql_query,\
                                         additional_kwargs={'pydantic_model':sql_query_response.__class__.__name__}))
-        print("State after SQL generator:",state)
+        #print("State after SQL generator:",state)
+        print("SQL Query Generation stage completed")
         return state
     
 
