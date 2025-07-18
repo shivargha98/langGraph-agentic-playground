@@ -1,4 +1,6 @@
 import sqlite3
+import chainlit as cl
+
 def describe_schema(db_path):
 
     ### generating a schema description ##

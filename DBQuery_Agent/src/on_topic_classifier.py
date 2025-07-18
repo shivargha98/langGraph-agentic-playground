@@ -5,9 +5,14 @@ from state import AgentState
 from utils import *
 from dotenv import load_dotenv
 from agentops.sdk.decorators import agent, operation
+import chainlit as cl
+import asyncio
 load_dotenv()
 
-schema_knowledge = describe_schema(db_path)
+# schema_knowledge = describe_schema(db_path)
+
+with open("D:\langGraph-agentic-playground\DBQuery_Agent\schema_file.txt","r") as f:
+    schema_knowledge = f.read()
 
 class ClassifyQuestion(BaseModel):
     on_topic_label:str = Field(description = 'Is the question based on the schema described and can be\
@@ -20,9 +25,13 @@ class TopicClassifier:
     #     self.state = state
 
     @staticmethod
+    @cl.step(type="Question Classifier")
     @operation(name="query_classification_function")
     def on_topic_classifier(state:AgentState):
         #print("Inside On Topic Classifier, at present the state is:",state)
+
+        state['full_reflection'] = []
+        state["sql_query_reflection_history"] = []
 
         print("\nQuery Classification Started")
         recent_question = state['question'].content
@@ -34,6 +43,7 @@ class TopicClassifier:
                 Use the database description and schema description to understand,\
                 if the question is relevant and is in the bounds of the above database, respond with a 'Yes'.Otherwise respond with a 'No'
                                         """.format(schema_database=schema_knowledge))
+        print(sys_message)
 
         #print(list(state.keys()))
         if len(list(state.keys())) <= 1:
@@ -45,12 +55,17 @@ class TopicClassifier:
         state['question_history'].append(state['question'])
         state['messages'].append(state['question'])
 
-        human_message = HumanMessage(content=f"User Question: {state['question'].content}")
-        classfier_prompt_template = ChatPromptTemplate.from_messages([sys_message,human_message])
-        structure_llm = llm_model.with_structured_output(ClassifyQuestion)
-        classifier_chain = classfier_prompt_template | structure_llm
-        on_topic_res = classifier_chain.invoke({})
+        # human_message = HumanMessage(content=f"User Question: {state['question'].content}")
+        async def step_logic(sys_message,human_message):
+            async with cl.Step(name="🔍 Classifying Topic", type="run"):
+                classfier_prompt_template = ChatPromptTemplate.from_messages([sys_message,human_message])
+                structure_llm = llm_model.with_structured_output(ClassifyQuestion)
+                classifier_chain = classfier_prompt_template | structure_llm
+                on_topic_res = classifier_chain.invoke({})
+                return on_topic_res
         ### add the AI message and on topic classifier ###
+        human_message = HumanMessage(content=f"User Question: {state['question'].content}")
+        on_topic_res = asyncio.run(step_logic(sys_message,human_message))
         state['messages'].append(AIMessage(content=on_topic_res.on_topic_label.strip(),additional_kwargs={'pydantic_model':on_topic_res.__class__.__name__}))
         state['on_topic_classifier'] = str(on_topic_res.on_topic_label.strip())
         state['reflection_iterations'] = 0

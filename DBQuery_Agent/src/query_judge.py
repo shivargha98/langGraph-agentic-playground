@@ -4,6 +4,8 @@ from state import *
 from utils import *
 from pydantic import BaseModel, Field
 from agentops.sdk.decorators import agent,operation
+import asyncio
+import chainlit as cl
 
 class judgeReflection(BaseModel):
     coherence_rating:str = Field(...,description="Respond Excellent/ Good/ Poor based on whether the output is logically structured,clear or not")
@@ -21,6 +23,7 @@ class judgeReflection(BaseModel):
 class LLM_judge:
 
     @staticmethod    
+    @cl.step(name="LLM judge")
     @operation(name="judge_reflection_operation")
     def judge_reflect(state:AgentState):
 
@@ -74,27 +77,31 @@ class LLM_judge:
                 If RETRY, suggest which node has to be retried: e.g., SQLGenerator, ToolNode,\
                 If ACCEPT, node retry should be responded as None
     """
-        if "full_reflection" not in state or state["full_reflection"] is None:
-            state["full_reflection"] = []
-            state['full_reflection_iter'] = 0
+        # if "full_reflection" not in state or state["full_reflection"] is None:
+        #     state["full_reflection"] = []
+        #     state['full_reflection_iter'] = 0
 
         schema_desc = schema_knowledge
-        judge_prompt_template = ChatPromptTemplate.from_template(REFLECTION_JUDGE_PROMPT)
-        llm_judge_model = llm_judge.with_structured_output(judgeReflection)
-        judge_chain = judge_prompt_template | llm_judge_model
-        user_query = state['question'].content
-        sql_query = state['sql_query']
-        sql_out_result = state['sql_result']
-        tool_name = state['next_tool_selection']
-        tool_desc = tool_descriptors[tool_name]
-        response = judge_chain.invoke({
-                "user_query":user_query,"sql_query":sql_query,"sql_result":sql_out_result,"tool_name":tool_name,\
-                "tool_description":tool_desc,"schema":schema_desc
-        })
+        async def judge_step_logic():
+            async with cl.Step(name="🔍 Thinking, Acting and Tool executors", type="run"):
+                judge_prompt_template = ChatPromptTemplate.from_template(REFLECTION_JUDGE_PROMPT)
+                llm_judge_model = llm_judge.with_structured_output(judgeReflection)
+                judge_chain = judge_prompt_template | llm_judge_model
+                user_query = state['question'].content
+                sql_query = state['sql_query']
+                sql_out_result = state['sql_result']
+                tool_name = state['next_tool_selection']
+                tool_desc = tool_descriptors[tool_name]
+                response = judge_chain.invoke({
+                        "user_query":user_query,"sql_query":sql_query,"sql_result":sql_out_result,"tool_name":tool_name,\
+                        "tool_description":tool_desc,"schema":schema_desc
+                })
+                return response
+        response = asyncio.run(judge_step_logic())
         #print(dict(response))
-        #print("\n State after full reflection:",state)
+        
         state["full_reflection"].append(dict(response))
-
+        print("\n State after full reflection:",state)
         print("LLM Judge action completed")
         return state
 

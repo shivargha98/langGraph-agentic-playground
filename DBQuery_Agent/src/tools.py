@@ -2,6 +2,11 @@ import matplotlib.pyplot as plt
 from typing import List,Dict
 import langchain_core.tools
 import agentops.sdk.decorators
+import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
+import plotly.io as pio
+
 
 @langchain_core.tools.tool
 @agentops.sdk.decorators.tool()
@@ -66,10 +71,29 @@ def bar_chart_tool(data: Dict[str, float], title: str, x_axis: str, y_axis: str)
     plt.xlabel(x_axis,fontweight='bold')
     plt.ylabel(y_axis,fontweight='bold')
     plt.xticks(rotation=90)
-    save_path = "barchart.png"
+    save_path = "chart.png"
     plt.savefig(save_path)
     print('Plot Created')
-    plt.show()
+
+    df = pd.DataFrame({x_axis:list(data.keys()),y_axis:list(data.values())})
+    fig = go.Figure(px.bar(df, x=x_axis, y=y_axis))
+    fig.update_layout(
+        template='plotly_dark',  # stylish dark theme
+        plot_bgcolor='#1f1f1f',  # background of plotting area
+        paper_bgcolor='#111111',  # full canvas background
+        font=dict(color='white', size=14),
+        title=dict(
+        text=f"<b>{title}</b>",
+        font=dict(size=18),
+        x=0.5  # Center the title
+    )
+    )
+    fig.update_xaxes(tickangle=90)
+    fig.write_image("chart2.png",width=1000, height=700, scale=2,format="png")
+    #plt.show()
+
+    ###create plotly graphing###
+
     return save_path
 
 
@@ -104,8 +128,31 @@ def line_chart_tool(data:Dict[str,float],x_axis:str,y_axis:str,title:str):
     plt.xlabel(x_axis,fontweight='bold')
     plt.ylabel(y_axis,fontweight='bold')
     plt.title(title)
-    save_path = "linechart.png"
+    save_path = "chart.png"
     plt.savefig(save_path)
     print('Plot Created')
-    plt.show()
+    # plt.show()
+    ### create plotly graphing ####
+    df = pd.DataFrame({x_axis:list(data.keys()),y_axis:list(data.values())})
+    # x_axis = x_axis.capitalize()
+    # y_axis = y_axis.capitalize()
+    fig = go.Figure(px.line(df, x=x_axis, y=y_axis))
+    fig.update_layout(
+        template='plotly_dark',  # stylish dark theme
+        plot_bgcolor='#1f1f1f',  # background of plotting area
+        paper_bgcolor='#111111',  # full canvas background
+        font=dict(color='white', size=14),
+        title=dict(
+        text=f"<b>{title}</b>",
+        font=dict(size=18),
+        x=0.5  # Center the title
+    )
+    )
+    fig.update_xaxes(tickangle=-90)
+    fig.write_image("chart2.png",width=1000, height=700, scale=2,format="png")
+    #fig.write_image("chart2.png",format="png") 
+
+
+    #plt.show()
+
     return save_path

@@ -16,6 +16,8 @@ import io
 import os
 import agentops
 from agentops.sdk.decorators import session,workflow
+from dotenv import load_dotenv
+load_dotenv()
 
 AGENTOPS_API_KEY = os.getenv("AGENTOPS_API_KEY")
 agentops.init(
@@ -24,23 +26,28 @@ agentops.init(
     auto_start_session=False
 )
 
-workflowGraph = StateGraph(AgentState)
+#workflowGraph = StateGraph(AgentState)
 memory = MemorySaver()
 
 
 
 
 def end_node(state:AgentState):
+
+    #print(state)
     if state['on_topic_classifier'] == 'No':
         #print(AIMessage(content="Off Topic Question"))
         state['messages'].append(AIMessage(content="Off Topic Question"))
 
-    elif state['guardrail_validation'] == "validation_failed":
+    elif state['guardrail_validation'][-1] == "validation_failed":
         #print(AIMessage(content="Guard Failed, DELETE or DROP query detected"))
         state['messages'].append(AIMessage(content="Guard Failed, DELETE or DROP query detected in SQL query"))
     else:
         #print(AIMessage(content="Analytics generated"))
+        #print("HIII",state['messages'])
         state['messages'].append(AIMessage(content="All steps followed, llm judged and analytics generated"))
+
+    return state
         
 
 
@@ -48,7 +55,7 @@ def judgellm_decide(state:AgentState):
     #state['full_reflection_iter'] = state['full_reflection_iter'] + 1
     # if state['full_reflection_iter'] <= 1:
     #      return "END"
-    if len(state['full_reflection']) == 1:
+    if state['full_reflection'][-1]['node_retry'].lower() == "none":
         return "END"
     else:
         if state['full_reflection'][-1]['node_retry'].lower() == 'sqlgenerator':
@@ -84,6 +91,7 @@ def guardrail_logic(state:AgentState):
 @workflow(name="build_sql_graph")
 def build_graph():
 
+    workflowGraph = StateGraph(AgentState)
     
     workflowGraph.add_node("topic_classifier",TopicClassifier.on_topic_classifier)
     workflowGraph.add_node("sql_generator",SQLGen_agent.SQLGenerator)
@@ -149,11 +157,11 @@ def build_graph():
 
 
 @session(name="SQL_Agent_Trace")
-def run_workflow(user_query,app):
+def run_workflow(user_query,app,thread_id):
 
     
     config = {"configurable":{
-        "thread_id":1}}
+        "thread_id":thread_id}}
     response = app.invoke({'question':HumanMessage(content=user_query)},config)
     #print(response)
     return response

@@ -6,9 +6,12 @@ from typing import List
 from utils import *
 import sqlite3
 import json
+import asyncio
 from agentops.sdk.decorators import tool
+import chainlit as cl
 
 @tool(name='SQL_query_executor')
+@cl.step(name="Executor")
 def SQLExecutor(state:AgentState):
 
     print("\nSQL Execution on Database")
@@ -18,12 +21,14 @@ def SQLExecutor(state:AgentState):
 
         sql_query_code = state['sql_query']
         try:
-            conn = sqlite3.connect(db_path)
-
-            result = conn.execute(sql_query_code).fetchall()
+            async def sql_exec_logic():
+                async with cl.Step(name="🔍SQL Execution", type="run"):
+                    conn = sqlite3.connect(db_path)
+                    result = conn.execute(sql_query_code).fetchall()
+                    return result
             
             #print("res:",result)
-            
+            result = asyncio.run(sql_exec_logic())
             if len(state['sql_query_columns']) == 1:
                 #print([i[0] for i in result])
                 result = [i[0] for i in result]

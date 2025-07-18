@@ -1,5 +1,6 @@
 from agentic_workflow import *
-
+from dotenv import load_dotenv
+load_dotenv()
 ##################### phoenix by arize tracing ########################
 from phoenix.otel import register
 from openinference.instrumentation.langchain import LangChainInstrumentor
@@ -14,7 +15,7 @@ LangChainInstrumentor().instrument(tracer_provider=tracer_provider)
 # response = run_workflow(user_query.strip())
 ### config using the thread id ###
 
-app = build_graph()
+
 while True:
 
     print('What is your Query to the Chinook database?')
@@ -22,6 +23,7 @@ while True:
     if user_query.lower() in ['end','exit']:
         break
     else:
+        app = build_graph()
         response = run_workflow(user_query.strip(),app)
         print("AI: " + response["messages"][-1].content)
         
