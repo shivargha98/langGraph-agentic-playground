@@ -4,3 +4,8 @@
 */.ipynb_checkpoints
 */checkpoint.*
 */db
+*.json
+*.txt
+*.files
+*chart.png
+*chart2.png

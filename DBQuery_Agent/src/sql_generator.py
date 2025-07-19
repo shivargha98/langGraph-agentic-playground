@@ -55,6 +55,10 @@ class SQLGen_agent:
         sql_query_response = asyncio.run(sql_step_logic(sql_prompt_template,recent_question))
 
         print("SQL Query Generated: ",sql_query_response.sql_query)
+
+        with open('query.txt','w') as f:
+            f.write(sql_query_response.sql_query)
+
         state['sql_query'] = sql_query_response.sql_query
         state['sql_query_columns'] = sql_query_response.sql_column_names
         state['next_tool_selection'] = 'sqlexecutor'

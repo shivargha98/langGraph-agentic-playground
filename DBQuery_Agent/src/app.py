@@ -7,6 +7,7 @@ import uuid
 import plotly.io as pio
 import plotly.graph_objects as go
 from on_topic_classifier import *
+import os
 
 
 load_dotenv()
@@ -84,9 +85,38 @@ async def on_message(msg: cl.Message):
     print(thread_id)
     response = run_workflow(user_query.strip(),app,thread_id)
     response_msg = response["messages"][-1].content
+
+    ############# SQL SHOW #######################
+
+    with open("D:\langGraph-agentic-playground\DBQuery_Agent\query.txt", "r", encoding="utf-8") as f:
+        sql_query = f.read()
+
+    # Initialize streaming message
+    await cl.Message('Here is the SQL I generated for your query:').send()
+    msg = await cl.Message(content='', language="sql").send()
+
+
+    # Stream the query content
+    for char in sql_query.split():
+        await msg.stream_token(char+" ")
+        await asyncio.sleep(0.2)
+
+
+    ##########################################################
     
-    image = cl.Image(path="D:\langGraph-agentic-playground\DBQuery_Agent\chart2.png", name="Visualization", display="inline",size="large")
-    await cl.Message(
-        content="✨ Done crunching the numbers! Here's what I found:",
-        elements=[image]
-    ).send()
+    try:
+        image = cl.Image(path="D:\langGraph-agentic-playground\DBQuery_Agent\chart2.png", name="Visualization", display="inline",size="large")
+        await cl.Message(
+            content="✨ Done crunching the data & numbers! Here's what I found:",
+            elements=[image]
+        ).send()
+        os.remove("D:\langGraph-agentic-playground\DBQuery_Agent\chart2.png")
+        
+    except:
+        with open("D:\langGraph-agentic-playground\DBQuery_Agent\data.json","r") as f:
+            data = json.loads(json.load(f))
+        title = list(data.keys())[-1]
+        resp = "\n".join(i for i in data[title])
+        await cl.Message(
+            content=resp,
+        ).send()

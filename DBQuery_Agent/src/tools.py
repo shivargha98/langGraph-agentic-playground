@@ -6,13 +6,14 @@ import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
 import plotly.io as pio
+import json
 
 
 @langchain_core.tools.tool
 @agentops.sdk.decorators.tool()
 def text_listing_tool(data: List[str], title: str) -> str:
     """
-    Displays a list of textual entries as bullet points.
+    Generates a text file with a list of textual entries as bullet points.
 
     Use this tool when the SQL result returns only textual data (e.g., names of albums, artists, genres).
     
@@ -35,8 +36,11 @@ def text_listing_tool(data: List[str], title: str) -> str:
 
     """
     print(title)
-    for i in data:
-        print("* "+i)
+    dict_data = {title:data}
+    with open("data.json","w") as f:
+        json.dump(json.dumps(dict_data),f)
+    # for i in data:
+    #     print("* "+i)
 
 
 

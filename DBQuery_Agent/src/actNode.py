@@ -81,7 +81,7 @@ class ReACT:
                         path = tools_by_name[tool_call['name']].invoke({'data':data,'title':title})
                         state['messages'].append(
                             ToolMessage(
-                                content = "Plot saved at: "+path,
+                                content = "Listing the data",
                                 tool_call_id = call_id,
                                 tool_name = tool_call['name'] ##required for gemini
                             )
